@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letreros de Picking — Walter Lund</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Barlow Condensed', sans-serif; }
+
+/* ════════════════════════════
+   FORZAR COLORES EN IMPRESIÓN
+   (Chrome necesita esto)
+════════════════════════════ */
+* {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+/* ════════════════════════════
+   EDITOR — solo en pantalla
+════════════════════════════ */
+@media screen {
+  .print-sheet { display: none; }
+
+  body { background: #1c1c1c; min-height: 100vh; }
+
+  .ui { padding: 28px 20px 48px; color: #f0f0f0; }
+
+  .ui-header { text-align: center; margin-bottom: 32px; }
+  .ui-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem; letter-spacing: 6px; color: #FFD600;
+  }
+  .ui-header p { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: #555; margin-top: 4px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 22px; max-width: 1080px; margin: 0 auto;
+  }
+
+  .card { background: #242424; border-radius: 10px; border: 1px solid #333; overflow: hidden; }
+  .card-title {
+    background: #181818; padding: 9px 16px;
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 3px;
+    text-transform: uppercase; color: #555; border-bottom: 1px solid #333;
+  }
+  .preview-area {
+    padding: 22px 16px; display: flex; justify-content: center; align-items: center; min-height: 190px;
+    background: repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#1c1c1c 10px,#1c1c1c 20px);
+  }
+  .editor-area { padding: 14px 16px; border-top: 1px solid #333; }
+  .editor-area label {
+    display: block; font-size: 0.65rem; font-weight: 800;
+    letter-spacing: 2.5px; text-transform: uppercase; color: #555;
+    margin-top: 11px; margin-bottom: 4px;
+  }
+  .editor-area label:first-child { margin-top: 0; }
+  .editor-area input, .editor-area textarea {
+    width: 100%; background: #141414; border: 1px solid #383838; border-radius: 6px;
+    padding: 8px 12px; color: #eee; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 600; letter-spacing: 1px; outline: none; transition: border-color .15s;
+  }
+  .editor-area input:focus, .editor-area textarea:focus { border-color: #FFD600; }
+  .editor-area textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
+
+  .print-bar { max-width: 1080px; margin: 28px auto 0; display: flex; justify-content: center; }
+  .btn {
+    padding: 13px 40px; border: none; border-radius: 7px;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem;
+    font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase;
+    cursor: pointer; background: #FFD600; color: #111; transition: all .15s;
+  }
+  .btn:hover { background: #FFC000; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,214,0,.3); }
+}
+
+/* ════════════════════════════
+   LETREROS — preview pantalla
+════════════════════════════ */
+.letrero-familia {
+  width: 240px;
+  background: #FFD600;
+  border: 5px solid #111;
+  border-radius: 6px;
+  padding: 16px 20px 18px;
+  text-align: center;
+  box-shadow: 5px 5px 0 #111;
+}
+.letrero-familia .lf-tag {
+  font-size: 0.58rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: #444;
+}
+.letrero-familia .lf-divider { height: 3px; background: #111; margin: 7px 0; border-radius: 2px; }
+.letrero-familia .lf-nombre {
+  font-family: 'Bebas Neue', sans-serif; font-size: 3.2rem; color: #111; line-height: 1; letter-spacing: 3px;
+}
+.letrero-familia .lf-sub {
+  font-size: 0.8rem; font-weight: 700; color: #333; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px;
+}
+
+.letrero-lado { width: 240px; border-radius: 6px; padding: 13px 15px 16px; }
+.letrero-lado.izq { background: #1565C0; border: 5px solid #0D47A1; box-shadow: 5px 5px 0 #0D47A1; }
+.letrero-lado.der { background: #D84315; border: 5px solid #BF360C; box-shadow: 5px 5px 0 #BF360C; }
+.letrero-lado .ll-header {
+  display: flex; align-items: center; gap: 7px;
+  border-bottom: 2px solid rgba(255,255,255,.2); padding-bottom: 9px; margin-bottom: 9px;
+}
+.letrero-lado .ll-flecha { font-size: 2rem; color: #fff; line-height: 1; flex-shrink: 0; }
+.letrero-lado .ll-titulo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: #fff; letter-spacing: 3px; line-height: 1.1;
+}
+.letrero-lado .ll-lista { list-style: none; }
+.letrero-lado .ll-lista li {
+  font-size: 0.9rem; font-weight: 700; color: #fff;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 0;
+  display: flex; align-items: center; gap: 6px;
+}
+.letrero-lado .ll-lista li::before { content: '▪'; font-size: .5rem; opacity: .5; flex-shrink: 0; }
+
+/* ════════════════════════════
+   IMPRESIÓN — cada página llena
+════════════════════════════ */
+@media print {
+
+  @page { size: A4; margin: 0; }
+
+  html, body { width: 210mm; height: 297mm; }
+
+  .ui { display: none !important; }
+
+  /* Cada .print-page = una página A4 completa */
+  .print-page {
+    width: 210mm;
+    height: 297mm;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+
+  /* ── FAMILIA llena la hoja ── */
+  .p-familia {
+    width: 190mm;
+    height: 270mm;
+    background: #FFD600 !important;
+    border: 10px solid #111 !important;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30mm 20mm;
+  }
+  .p-familia .lf-tag {
+    font-size: 14pt; font-weight: 900; letter-spacing: 8px;
+    text-transform: uppercase; color: #444;
+  }
+  .p-familia .lf-divider {
+    width: 80%; height: 5px; background: #111 !important;
+    margin: 12px auto; border-radius: 3px;
+  }
+  .p-familia .lf-nombre {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 96pt; color: #111 !important; line-height: 1; letter-spacing: 6px;
+  }
+  .p-familia .lf-sub {
+    font-size: 22pt; font-weight: 700; color: #333 !important;
+    letter-spacing: 6px; text-transform: uppercase; margin-top: 10px;
+  }
+
+  /* ── LADOS llenan la hoja ── */
+  .p-lado {
+    width: 190mm;
+    height: 270mm;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20mm 24mm;
+  }
+  .p-lado.izq { background: #1565C0 !important; border: 10px solid #0D47A1 !important; }
+  .p-lado.der { background: #D84315 !important; border: 10px solid #BF360C !important; }
+
+  .p-lado .ll-header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 4px solid rgba(255,255,255,.3) !important;
+    padding-bottom: 16px; margin-bottom: 20px;
+  }
+  .p-lado .ll-flecha { font-size: 64pt; color: #fff !important; line-height: 1; flex-shrink: 0; }
+  .p-lado .ll-titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48pt; color: #fff !important; letter-spacing: 5px; line-height: 1;
+  }
+  .p-lado .ll-lista { list-style: none; }
+  .p-lado .ll-lista li {
+    font-size: 24pt; font-weight: 700; color: #fff !important;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 0; display: flex; align-items: center; gap: 12px;
+  }
+  .p-lado .ll-lista li::before { content: '▪'; font-size: 12pt; opacity: .5; flex-shrink: 0; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- EDITOR -->
+<div class="ui">
+  <div class="ui-header">
+    <h1>LETREROS DE PICKING</h1>
+    <p>Edita · Previsualiza · Imprime — 3 hojas, una por letrero</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-title">① Letrero — Familia de Producto</div>
+      <div class="preview-area">
+        <div class="letrero-familia">
+          <div class="lf-tag">Familia de Producto</div>
+          <div class="lf-divider"></div>
+          <div class="lf-nombre" id="prev-lf-nombre">DÚPLEX</div>
+          <div class="lf-sub" id="prev-lf-sub">Papeles Recubiertos</div>
+        </div>
+      </div>
+      <div class="editor-area">
+        <label>Nombre de la familia</label>
+        <input id="inp-lf-nombre" type="text" value="DÚPLEX"
+          oninput="sync('prev-lf-nombre', this.value.toUpperCase())">
+        <label>Subtítulo (opcional)</label>
+        <input id="inp-lf-sub" type="text" value="Papeles Recubiertos"
+          oninput="sync('prev-lf-sub', this.value)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">② Letrero — Lado Izquierdo</div>
+      <div class="preview-area">
+        <div class="letrero-lado izq">
+          <div class="ll-header">
+            <span class="ll-flecha">←</span>
+            <span class="ll-titulo" id="prev-izq-titulo">LADO IZQUIERDO</span>
+          </div>
+          <ul class="ll-lista" id="prev-izq-lista">
+            <li>Dúplex 295 g Mercurio</li>
+            <li>Dúplex 250 g Mercurio</li>
+            <li>Dúplex 220 g Mercurio</li>
+            <li>Dúplex 190 g Mercurio</li>
+          </ul>
+        </div>
+      </div>
+      <div class="editor-area">
+        <label>Título</label>
+        <input id="inp-izq-titulo" type="text" value="LADO IZQUIERDO"
+          oninput="sync('prev-izq-titulo', this.value.toUpperCase())">
+        <label>Productos (uno por línea)</label>
+        <textarea id="inp-izq-lista"
+          oninput="syncLista('prev-izq-lista', this.value)">Dúplex 295 g Mercurio
+Dúplex 250 g Mercurio
+Dúplex 220 g Mercurio
+Dúplex 190 g Mercurio</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">③ Letrero — Lado Derecho</div>
+      <div class="preview-area">
+        <div class="letrero-lado der">
+          <div class="ll-header">
+            <span class="ll-titulo" id="prev-der-titulo">LADO DERECHO</span>
+            <span class="ll-flecha">→</span>
+          </div>
+          <ul class="ll-lista" id="prev-der-lista">
+            <li>Bond 75 g Iberia</li>
+            <li>Bond 90 g Iberia</li>
+            <li>Couché 150 g</li>
+            <li>Couché 200 g</li>
+          </ul>
+        </div>
+      </div>
+      <div class="editor-area">
+        <label>Título</label>
+        <input id="inp-der-titulo" type="text" value="LADO DERECHO"
+          oninput="sync('prev-der-titulo', this.value.toUpperCase())">
+        <label>Productos (uno por línea)</label>
+        <textarea id="inp-der-lista"
+          oninput="syncLista('prev-der-lista', this.value)">Bond 75 g Iberia
+Bond 90 g Iberia
+Couché 150 g
+Couché 200 g</textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="print-bar">
+    <button class="btn" onclick="buildAndPrint()">🖨&nbsp; Imprimir — 3 hojas con color</button>
+  </div>
+</div>
+
+<!-- HOJA DE IMPRESIÓN -->
+<div class="print-sheet" id="print-sheet"></div>
+
+<script>
+function sync(id, val) {
+  document.getElementById(id).textContent = val || '';
+}
+function syncLista(id, val) {
+  const ul = document.getElementById(id);
+  const items = val.split('\n').map(s => s.trim()).filter(Boolean);
+  ul.innerHTML = items.length
+    ? items.map(p => `<li>${esc(p)}</li>`).join('')
+    : '<li style="opacity:.4">Sin productos</li>';
+}
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function rows(val) {
+  return val.split('\n').map(s=>s.trim()).filter(Boolean)
+    .map(p=>`<li>${esc(p)}</li>`).join('') || '<li style="opacity:.4">Sin productos</li>';
+}
+
+function buildAndPrint() {
+  const lfNombre  = document.getElementById('inp-lf-nombre').value.toUpperCase() || 'FAMILIA';
+  const lfSub     = document.getElementById('inp-lf-sub').value;
+  const izqTitulo = document.getElementById('inp-izq-titulo').value.toUpperCase() || 'LADO IZQUIERDO';
+  const derTitulo = document.getElementById('inp-der-titulo').value.toUpperCase() || 'LADO DERECHO';
+
+  document.getElementById('print-sheet').innerHTML = `
+
+    <div class="print-page">
+      <div class="p-familia">
+        <div class="lf-tag">Familia de Producto</div>
+        <div class="lf-divider"></div>
+        <div class="lf-nombre">${esc(lfNombre)}</div>
+        ${lfSub ? `<div class="lf-sub">${esc(lfSub)}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="print-page">
+      <div class="p-lado izq">
+        <div class="ll-header">
+          <span class="ll-flecha">←</span>
+          <span class="ll-titulo">${esc(izqTitulo)}</span>
+        </div>
+        <ul class="ll-lista">${rows(document.getElementById('inp-izq-lista').value)}</ul>
+      </div>
+    </div>
+
+    <div class="print-page">
+      <div class="p-lado der">
+        <div class="ll-header">
+          <span class="ll-titulo">${esc(derTitulo)}</span>
+          <span class="ll-flecha">→</span>
+        </div>
+        <ul class="ll-lista">${rows(document.getElementById('inp-der-lista').value)}</ul>
+      </div>
+    </div>
+  `;
+
+  window.print();
+}
+</script>
+</body>
+</html>
